@@ -1,0 +1,47 @@
+schemaVersion: 2.2.2
+metadata:
+  name: demodevspaceapp
+projects:
+  - name: demodevspaceapp
+    git:
+      remotes:
+        origin: https://github.com/ivanjovansn/demodevspaceapp.git
+components:
+  - name: tools
+    container:
+      image: quay.io/devfile/universal-developer-image:ubi8-latest
+      memoryLimit: 3Gi
+      endpoints:
+        - exposure: none
+          name: debug
+          protocol: tcp
+          targetPort: 5005
+        - exposure: public
+          name: 8080-https
+          protocol: https
+          targetPort: 8080
+      volumeMounts:
+        - name: m2
+          path: /home/user/.m2
+  - name: m2
+    volume:
+      size: 1G
+commands:
+  - id: maven-build
+    exec:
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: mvn clean install
+      group:
+        kind: build
+        isDefault: true
+  - id: run
+    exec:
+      component: tools
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: |
+        mvn spring-boot:run -DskipTests \
+        -Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005,quiet=y'
+      group:
+        kind: run
+        isDefault: true
