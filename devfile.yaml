@@ -35,7 +35,7 @@ components:
         - name: POSTGRESQL_DATABASE
           value: db
       endpoints:
-        - name: postgres
+        - name: postgresql
           targetPort: 5432
           exposure: none
   - name: m2
